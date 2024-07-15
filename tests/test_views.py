@@ -1,5 +1,5 @@
-import pytest
 from django.urls import reverse
+
 
 def test_api_parse_succeeds(client):
     address_string = '123 main st chicago il'
