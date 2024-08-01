@@ -4,22 +4,26 @@
 # version number in the pilot. YMMV. See this post for a discussion of
 # some options and their pros and cons:
 # https://pythonspeed.com/articles/base-image-python-docker-images/
-FROM python:3.8
+# Use the official Node.js image as the base
+FROM node:14-buster
 
-# Add the NodeSource PPA
-# (see: https://github.com/nodesource/distributions/blob/master/README.md)
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+# Install Python and other necessary packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    python3-dev \
+    postgresql-client \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install any additional OS-level packages you need via apt-get. RUN statements
-# add additional layers to your image, increasing its final size. Keep your
-# image small by combining related commands into one RUN statement, e.g.,
-#
-# RUN apt-get update && \
-#     apt-get install -y python-pip
-#
-# Read more on Dockerfile best practices at the source:
-# https://docs.docker.com/develop/develop-images/dockerfile_best-practices
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client nodejs
+# Create a symlink for python and pip to be compatible with the original Dockerfile
+RUN ln -sf /usr/bin/python3 /usr/bin/python \
+    && ln -sf /usr/bin/pip3 /usr/bin/pip
+
+# Set environment variables
+ENV PYTHONUNBUFFERED 1
 
 # Inside the container, create an app directory and switch into it
 RUN mkdir /app
